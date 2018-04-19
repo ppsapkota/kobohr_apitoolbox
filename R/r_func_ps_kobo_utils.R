@@ -4,12 +4,44 @@ Developed by: Punya Prasad Sapkota
 Last Modified: 18 July 2017
 ***********************************************
 #---USAGE
+#--TWO Sections
+#Section 1
 #-----KoBo data Access using API v1
 #-----https://kc.humanitarianresponse.info/api/v1
-
+#Section 2
+#-----new KoBo KPI
 -'
-#user names and password to be loaded from external authenticate file - this approach to be checked
 
+###--------SECTION 2---KPI---------
+#---Upload form in NEW KoBo toolbox--------
+#Import your form first (POST to https://kobo.humanitarianresponse.info/imports/)
+#which will create a new asset in KPI which you can then deploy 
+#by POSTing to https://kobo.humanitarianresponse.info/assets/[asset ID number]/deployment/
+#USAGE: kobo_formxlsx="./xlsform/kobo_1701_NW.xlsx"
+#url = "https://kobo.humanitarianresponse.info/imports/"
+kobohr_kpi_upload_xlsform <-function(url,kobo_xlsform,u,pw){
+  result<-httr::POST (url,
+                      body=list(
+                        xls_file=upload_file(path=kobo_xlsform)),
+                      authenticate(u,pw))
+  result<-result
+}
+
+###--------SECTION 1---KC---------
+#---Upload form in KoBo toolbox--------
+#curl -X POST -F xls_file=@/path/to/form.xls https://kobo.humanitarianresponse.info/api/v1/forms
+#POST(url, body = upload_file("mypath.txt"))
+#USAGE: kobo_formxlsx="./xlsform/kobo_1701_NW.xlsx"
+#url = "https://kc.humanitarianresponse.info/api/v1/forms"
+kobohr_upload_xlsform <-function(url,kobo_xlsform,u,pw){
+  result<-httr::POST (url,
+                      body=list(
+                        xls_file=upload_file(path=kobo_xlsform)),
+                      authenticate(u,pw))
+  result<-result
+}
+
+#user names and password to be loaded from external authenticate file - this approach to be checked
 #returns list of forms as a dataframe
 #url <- "https://kc.humanitarianresponse.info/api/v1/data.csv"
 kobohr_getforms_csv <-function(url,u,pw){
@@ -38,20 +70,6 @@ kobohr_count_submission <-function(url,u,pw){
   d_content <- fromJSON(d_content)
   d_count_submission <- d_content$count
 }
-
-#---Upload form in KoBo toolbox--------
-#curl -X POST -F xls_file=@/path/to/form.xls https://kobo.humanitarianresponse.info/api/v1/forms
-#POST(url, body = upload_file("mypath.txt"))
-#USAGE: kobo_form_xlsx="./xlsform/kobo_1701_NW.xlsx"
-#url = "https://kc.humanitarianresponse.info/api/v1/forms"
-kobohr_upload_xls_form <-function(url,kobo_xls_form,u,pw){
-  result<-httr::POST (url,
-                      body=list(
-                        xls_file=upload_file(path=kobo_xls_form)),
-                      authenticate(u,pw))
- result<-result
-  }
-
 
 #downlod data in CSV format
 #---Parameters
@@ -93,4 +111,16 @@ kobohr_getdata<-function(url,u,pw){
   d_content <- rawToChar(rawdata$content)
   d_content <- fromJSON(d_content)
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
