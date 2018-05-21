@@ -30,34 +30,43 @@ kpi_url <- "https://kobo.humanitarianresponse.info/imports/"
 #<input type="file" accept=".xls,.xlsx,application/xls,application/vnd.ms-excel,
 #application/octet-stream,application/vnd.openxmlformats,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
 #"autocomplete="off" style="display: none;">
-#---NOT WORKING---ONCE sorted out change to function------------
+
+#STEP1--- Uploading the XLSForm ------------
 result<-httr::POST(url=kpi_url,
                     body=list(
-                      file=upload_file(path=kobo_form_xlsx)
+                      file=upload_file(path=kobo_form_xlsx),
+                      library = FALSE
                       ),
                       authenticate(kobo_user,Kobo_pw)
                   )
+
 d_content <- rawToChar(result$content)
-print (d_content)
+#print (d_content)
+d_content <- fromJSON(d_content)
+#--success - status = 'processing'
+
+f_url<-d_content$url
+#STEP2---getting the resulting asset UID---
+#supply url
+result<-GET(f_url,authenticate(kobo_user,Kobo_pw),progress())
+d_content <- rawToChar(result$content)
+d_content <- fromJSON(d_content)
+#--success - status = 'complete'
+
+#STEP3-----Deploying the form------
+#kpi_id <- d_content$uid
+asset_uid <- d_content$messages$created$uid
+url <-paste0("https://kobo.humanitarianresponse.info/assets/",asset_uid,"/deployment/")
+d <- list(owner=paste0("https://kobo.humanitarianresponse.info/users/",kobo_user,"/"),active=TRUE)
+#d<-list(owner=paste0("https://kobo.humanitarianresponse.info/users/",kobo_user,"/"),active=TRUE)
+
+result<-httr::POST (url,
+                    body=d,
+                    authenticate(kobo_user,Kobo_pw)
+                    )
+
+d_content <- rawToChar(result$content)
+print(d_content)
 d_content <- fromJSON(d_content)
 
-# postForm(uri="https://xxx.YYYY/upload",
-#          file = fileUpload(
-#                 filename =  outfilename, contentType = 'text/txt'),
-#                 add_headers(Authorization=paste0("Bearer ",btoken$access_token)
-#                             )
-#          )
 
-
-# httpheader <- c(Authorization=paste0("Bearer ",btoken$access_token))
-# status<-postForm(uri=paste0(server,"upload"),
-#                  file = fileUpload(filename =  outfilename),
-#                  .opts=list(httpheader=httpheader)
-#                  )
-
-# result<-  postForm(uri=kpi_url,
-#                    file=fileUpload(filename=kobo_form_xlsx),
-#                    .opts=list(authenticate(kobo_user,Kobo_pw))
-#                   )
-# d_content <- rawToChar(result$content)
-# print (d_content)
