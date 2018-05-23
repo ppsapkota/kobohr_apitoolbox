@@ -1,7 +1,7 @@
 '-
 ***********************************************
 Developed by: Punya Prasad Sapkota
-Last Modified: 18 July 2017
+Last Modified: 23 May 2018
 ***********************************************
 #---USAGE
 #--TWO Sections
@@ -19,13 +19,73 @@ Last Modified: 18 July 2017
 #by POSTing to https://kobo.humanitarianresponse.info/assets/[asset ID number]/deployment/
 #USAGE: kobo_formxlsx="./xlsform/kobo_1701_NW.xlsx"
 #url = "https://kobo.humanitarianresponse.info/imports/"
-kobohr_kpi_upload_xlsform <-function(url,kobo_xlsform,u,pw){
-  result<-httr::POST (url,
-                      body=list(
-                        xls_file=upload_file(path=kobo_xlsform)),
-                      authenticate(u,pw))
-  result<-result
+
+#POST a new import as a multipart form. The necessary parameters are library=false and file, which cotains the XLSForm:
+#john@scrappy:/tmp/api_demo$ curl --silent --user jnm_api:test-for-punya --header 'Accept: application/json' 
+#-X POST https://kobo.humanitarianresponse.info/imports/ --form library=false --form file=@kobo_1701_NW.xlsx | python -m json.tool
+
+kobohr_kpi_upload_xlsform <-function(url,kobo_form_xlsx,u,pw){
+  #STEP 1 ---importing a form---
+    #POST a new import as a multipart form. The necessary parameters are library=false and file, which cotains the XLSForm:
+    #john@scrappy:/tmp/api_demo$ curl --silent --user jnm_api:test-for-punya --header 'Accept: application/json' 
+    #-X POST https://kobo.humanitarianresponse.info/imports/ --form library=false --form file=@kobo_1701_NW.xlsx | python -m json.tool
+    result<-httr::POST(url=url,
+                       body=list(
+                         file=upload_file(path=kobo_form_xlsx),
+                         library = 'false'
+                       ),
+                       authenticate(u,pw)
+    )
+    #return asset uid
+    d_content <- rawToChar(result$content)
+    d_content <- fromJSON(d_content)
+    #get the url to pass to the next step
+    status<- d_content$status ##--success - status = 'processing'
+    print (status)
+    import_url<-d_content$url
+    print (paste0("Asset Import URL - ",import_url))
+    return(d_content) 
 }
+
+#STEP2----Get the asset UID-------------------------
+#The asset UID is given by messages.created[0].uid in the JSON response when GETting an import. 
+#Multiple GETs may be required until the server indicates "status": "complete" in the response:
+#john@scrappy:/tmp/api_demo$ curl --silent --user jnm_api:test-for-punya --header 'Accept: application/json' 
+#https://kobo.humanitarianresponse.info/imports/iGYukk6NVEA64zwMsPtgRD/ | python -m json.tool
+# the URL is fetched from the output of 
+
+kobohr_kpi_get_asset_uid<-function(url, u, pw){
+  result<-GET(url=url,authenticate(u,pw),progress())
+  d_content <- rawToChar(result$content)
+  d_content <- fromJSON(d_content)
+  #--success - status = 'complete'
+  print (d_content$status)
+  print (paste0("Asset UID - ", asset_uid))
+  return(d_content)
+}
+
+#STEP3-----Deploying an Asset------
+#Deploying an asset
+#Construct a URL using the asset UID: https://kobo.humanitarianresponse.info/assets/[your-asset-UID]/deployment/; 
+#then, POST with the form parameter active=true.
+#john@scrappy:/tmp/api_demo$ curl --silent --user jnm_api:test-for-punya --header 'Accept: application/json' 
+#-X POST https://kobo.humanitarianresponse.info/assets/apLBsTJ4JAReiAWQQQBKNZ/deployment/ --form active=true | python -m json.tool
+
+#d<-list(owner=paste0("https://kobo.humanitarianresponse.info/users/",kobo_user,"/"),active=TRUE)
+kobohr_kpi_deploy_asset<- function (asset_uid, u, pw){
+  asset_deployment_url <-paste0("https://kobo.humanitarianresponse.info/assets/",asset_uid,"/deployment/")
+  d <- list(owner=paste0("https://kobo.humanitarianresponse.info/users/",u,"/"),active=TRUE)
+  result<-httr::POST (url=asset_deployment_url,
+                      body=d,
+                      authenticate(u,pw)
+  )
+  d_content <- rawToChar(result$content)
+  d_content <- fromJSON(d_content)
+  print (paste0("Deployment Success - ", d_content$identifier))
+  return(d_content)
+}
+
+
 
 ###--------SECTION 1---KC---------
 #---Upload form in KoBo toolbox--------
@@ -33,13 +93,13 @@ kobohr_kpi_upload_xlsform <-function(url,kobo_xlsform,u,pw){
 #POST(url, body = upload_file("mypath.txt"))
 #USAGE: kobo_formxlsx="./xlsform/kobo_1701_NW.xlsx"
 #url = "https://kc.humanitarianresponse.info/api/v1/forms"
-kobohr_upload_xlsform <-function(url,kobo_xlsform,u,pw){
-  result<-httr::POST (url,
-                      body=list(
-                        xls_file=upload_file(path=kobo_xlsform)),
-                      authenticate(u,pw))
-  result<-result
-}
+# kobohr_upload_xlsform <-function(url,kobo_xlsform,u,pw){
+#   result<-httr::POST (url,
+#                       body=list(
+#                         xls_file=upload_file(path=kobo_xlsform)),
+#                       authenticate(u,pw))
+#   result<-result
+# }
 
 #user names and password to be loaded from external authenticate file - this approach to be checked
 #returns list of forms as a dataframe
@@ -47,7 +107,6 @@ kobohr_upload_xlsform <-function(url,kobo_xlsform,u,pw){
 kobohr_getforms_csv <-function(url,u,pw){
   #supply url
   rawdata<-GET(url,authenticate(u,pw),progress())
-  cat("\n\n")
   d_content_csv <-read_csv(content(rawdata,"raw",encoding = "UTF-8"))
 }
 
@@ -56,7 +115,6 @@ kobohr_getforms_csv <-function(url,u,pw){
 kobohr_getdata_csv<-function(url,u,pw){
   #supply url for the data
   rawdata<-GET(url,authenticate(u,pw),progress())
-  cat("\n")
   d_content <- read_csv(content(rawdata,"raw",encoding = "UTF-8"))
 }
 
@@ -107,7 +165,6 @@ kobohr_getforms <-function(url,u,pw){
 kobohr_getdata<-function(url,u,pw){
   #supply url for the data
   rawdata<-GET(url,authenticate(u,pw),progress())
-  cat("\n\n")
   d_content <- rawToChar(rawdata$content)
   d_content <- fromJSON(d_content)
 }
