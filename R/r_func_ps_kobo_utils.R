@@ -86,6 +86,31 @@ kobohr_kpi_deploy_asset<- function (asset_uid, u, pw){
 }
 
 
+#Share asset with another user
+# Share a form
+# Sharing requires a POST to https://kobo.humanitarianresponse.info/permissions/ with three form parameters:
+#    content_object: the URL, relative or absolute, of the asset to be shared, e.g. `/assets/aSAKqcFRv9nYWqiKGvZC7w/;
+#  permission: a string indicating the permission to grant, e.g. change_asset. This can be any assignable permission for an
+# asset;
+#  user: the URL, relative or absolute, identifying the user who will receive the new permission, e.g. /users/jnm/. The last
+# component of the URL is the username.
+# john@scrappy:/tmp/api_demo$ curl ‐‐silent ‐‐user jnm_api:test‐for‐punya ‐‐header 'Accept:
+# application/json' ‐X POST https://kobo.humanitarianresponse.info/permissions/ ‐‐form
+# content_object=/assets/apLBsTJ4JAReiAWQQQBKNZ/ ‐‐form permission=change_asset ‐‐form
+# user=/users/jnm/ | python ‐m json.tool
+kobohr_kpi_share_asset<- function (content_object_i, permission_i, user_i, u, pw){
+  asset_share_url <-"https://kobo.humanitarianresponse.info/permissions/"
+  d <- list(content_object=content_object_i, permission=permission_i, user=user_i)
+  result<-httr::POST (url=asset_share_url,
+                      body=d,
+                      authenticate(u,pw)
+  )
+  d_content <- rawToChar(result$content)
+  d_content <- fromJSON(d_content)
+  return(d_content)
+}
+
+
 
 ###--------SECTION 1---KC---------
 #---Upload form in KoBo toolbox--------
