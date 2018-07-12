@@ -19,7 +19,7 @@ kpi_url <- "https://kobo.humanitarianresponse.info/imports/"
 #kobo_form_xlsx<-"./xlsform/kobo_1701_NW.xlsx"
 kobo_form_xlsx_folder<-"./Data/xlsform/tur/"
 kobo_users_file<-"./Data/kobo_users/MSNA2018_TurkeyXB_coverage_summary_govpcode.xlsx"
-asset_uid_savename<-"./Data/kobo_users/asset_uid_tur.xlsx"
+asset_uid_savename<-"./Data/kobo_users/asset_uid_tur_additional.xlsx"
 ## get list of files
 f_list<-list.files(path=kobo_form_xlsx_folder,full.names=TRUE, ignore.case = TRUE,pattern = "xlsx|XLSX")
 #read KoBo users list
@@ -64,16 +64,16 @@ d_asset_uid$organization_code<-str_replace_all(d_asset_uid$f_name,"kobo_msna2018
 d_kobo_users<-select(d_kobo_users,organization_code,kobo_user) %>% 
               mutate(organization_code=as.character(organization_code))
 
-d_asset_uid<-d_asset_uid %>%
-             left_join(d_kobo_users,by=c("organization_code"="organization_code"))
+d_asset_uid_kobo_users<-d_asset_uid %>%
+                        left_join(d_kobo_users,by=c("organization_code"="organization_code"))
 
 ##--------exort asset uid
-openxlsx::write.xlsx(d_asset_uid,asset_uid_savename, sheetName="data")
+openxlsx::write.xlsx(d_asset_uid_kobo_users,asset_uid_savename, sheetName="data")
 
 
 #DEPLOY ASSET
-for (i_row in 1:nrow(d_asset_uid)){
-  asset_uid<-d_asset_uid$asset_uid[i_row]
+for (i_row in 1:nrow(d_asset_uid_kobo_users)){
+  asset_uid<-d_asset_uid_kobo_users$asset_uid[i_row]
   #STEP3 ----Deploy asset
   d_content<-kobohr_kpi_deploy_asset(asset_uid, kobo_user, Kobo_pw)
 }
@@ -88,9 +88,9 @@ for (i_row in 1:nrow(d_asset_uid)){
 #   'change_submissions',
 #   'validate_submissions',
 # )
-for (i_row in 1:nrow(d_asset_uid)){
-  asset_uid<-d_asset_uid$asset_uid[i_row]
-  share_kobo_users<-d_asset_uid$kobo_user[i_row]
+for (i_row in 1:nrow(d_asset_uid_kobo_users)){
+  asset_uid<-d_asset_uid_kobo_users$asset_uid[i_row]
+  share_kobo_users<-d_asset_uid_kobo_users$kobo_user[i_row]
   #STEP3 ----Deploy asset
   content_object_i<-paste0("/assets/", asset_uid,"/")
   
@@ -108,7 +108,7 @@ for (i_row in 1:nrow(d_asset_uid)){
         for (permission_i in permission_list){
           #permission_i<-"add_submissions"
           d_content<-kobohr_kpi_share_asset(content_object_i, permission_i, user_i, kobo_user, Kobo_pw)
-          print (paste0(d_asset_uid$f_name[i_row],"--", asset_uid,"--",d_content$user, "--",user_i,"--", permission_i))
+          print (paste0(d_asset_uid_kobo_users$f_name[i_row],"--", asset_uid,"--",d_content$user, "--",user_i,"--", permission_i))
         }
   }
 }

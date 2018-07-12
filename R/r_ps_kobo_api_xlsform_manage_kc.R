@@ -124,6 +124,17 @@ url<-"https://kc.humanitarianresponse.info/api/v1/forms/225262"
 result<-httr::DELETE (form_url,authenticate(kobo_user,Kobo_pw))
 
 
+#DELETE FORMS
+
+
+
+
+
+
+
+
+
+
 
 #curl -X POST -d '{"id": "[form ID]", "submission": [the JSON]} http://localhost:8000/api/v1/submissions -u user:pass -H "Content-Type: application/json"
 #curl -X POST -F xls_file=@/path/to/form.xls https://kobo.humanitarianresponse.info/api/v1/projects/1/forms
