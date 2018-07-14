@@ -60,7 +60,9 @@ kobohr_kpi_get_asset_uid<-function(url, u, pw){
   d_content <- fromJSON(d_content)
   #--success - status = 'complete'
   print (d_content$status)
+  asset_uid <- d_content$messages$created$uid
   print (paste0("Asset UID - ", asset_uid))
+  #print (paste0("Asset UID - ", asset_uid))
   return(d_content)
 }
 

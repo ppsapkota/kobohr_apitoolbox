@@ -5,6 +5,8 @@
 #3) share the deployed form to other user
 #4) copy/clone form and change properties such as form name etc
 
+rm(list=ls())
+
 ## SET KoBO user name and password
 kobo_user<- ""
 Kobo_pw<-""
@@ -19,7 +21,7 @@ kpi_url <- "https://kobo.humanitarianresponse.info/imports/"
 #kobo_form_xlsx<-"./xlsform/kobo_1701_NW.xlsx"
 kobo_form_xlsx_folder<-"./Data/xlsform/tur/"
 kobo_users_file<-"./Data/kobo_users/MSNA2018_TurkeyXB_coverage_summary_govpcode.xlsx"
-asset_uid_savename<-"./Data/kobo_users/asset_uid_tur_additional.xlsx"
+asset_uid_savename<-"./Data/kobo_users/asset_uid_tur_20180714.xlsx"
 ## get list of files
 f_list<-list.files(path=kobo_form_xlsx_folder,full.names=TRUE, ignore.case = TRUE,pattern = "xlsx|XLSX")
 #read KoBo users list
@@ -53,6 +55,7 @@ for (i_row in 1:nrow(d_import_url)){
   #STEP2---getting the resulting asset UID---
   d_content<-kobohr_kpi_get_asset_uid(import_url,kobo_user,Kobo_pw)
   asset_uid <- d_content$messages$created$uid
+  print (paste0("Asset UID - ", asset_uid))
   #
   d_asset_uid<-bind_rows(d_asset_uid,data.frame(asset_uid=asset_uid,f_name=d_import_url$f_name[i_row]))
 }
