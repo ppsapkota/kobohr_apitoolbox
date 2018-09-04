@@ -20,7 +20,7 @@ source ("./R/r_func_ps_kobo_utils.R")
 #by POSTing to https://kobo.humanitarianresponse.info/assets/[asset ID number]/deployment/
 
 #https://kobo.humanitarianresponse.info/#/forms/a37dnoBZNdXbSUezkpk77v
-kpi_id <- "a37dnoBZNdXbSUezkpk77v"
+kpi_id <- "a37dnoBZNdcccccXbSUezkpk77v"
 url <-paste0("https://kobo.humanitarianresponse.info/assets/",kpi_id,"/deployment/")
 d <- list(owner=paste0("https://kobo.humanitarianresponse.info/users/",kobo_user,"/"))
 #d<-list(owner=paste0("https://kobo.humanitarianresponse.info/users/",kobo_user,"/"),active=TRUE)

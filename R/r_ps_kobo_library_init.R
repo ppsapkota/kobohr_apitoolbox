@@ -13,7 +13,7 @@ library(openxlsx) #'write xlsx'
 #library(XLConnect) #for big file to write
 
 
-library(data.table)
+#library(data.table)
 
 
 #load file r_kobo_utils.R file first
@@ -24,7 +24,7 @@ Sys.setlocale(category = "LC_ALL",locale = "arabic")
 Sys.setenv(R_ZIPCMD= "C:/Rtools/bin/zip")
 Sys.getenv("R_ZIPCMD","zip")
 
-source("./R/r_ps_kobo_authenticate.R")
+source("./Authenticate/r_ps_kobo_authenticate.R")
 source("./R/r_func_ps_kobo_utils.R")
 source("./R/r_func_ps_utils.R")
 path <- Sys.getenv("PATH")
