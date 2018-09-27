@@ -5,8 +5,6 @@
 #3) share the deployed form to other user
 #4) copy/clone form and change properties such as form name etc
 
-rm(list=ls())
-
 ## SET KoBO user name and password
 kobo_user<- ""
 Kobo_pw<-""

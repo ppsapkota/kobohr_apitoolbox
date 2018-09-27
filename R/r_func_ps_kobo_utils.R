@@ -100,6 +100,16 @@ kobohr_kpi_deploy_asset<- function (asset_uid, u, pw){
 # application/json' ‐X POST https://kobo.humanitarianresponse.info/permissions/ ‐‐form
 # content_object=/assets/apLBsTJ4JAReiAWQQQBKNZ/ ‐‐form permission=change_asset ‐‐form
 # user=/users/jnm/ | python ‐m json.tool
+##SHARE AssET
+# Assignable permissions that are stored in the database
+# ASSIGNABLE_PERMISSIONS = (
+#   'view_asset',
+#   'change_asset',
+#   'add_submissions',
+#   'view_submissions',
+#   'change_submissions',
+#   'validate_submissions',
+# )
 kobohr_kpi_share_asset<- function (content_object_i, permission_i, user_i, u, pw){
   asset_share_url <-"https://kobo.humanitarianresponse.info/permissions/"
   d <- list(content_object=content_object_i, permission=permission_i, user=user_i)
@@ -111,6 +121,10 @@ kobohr_kpi_share_asset<- function (content_object_i, permission_i, user_i, u, pw
   d_content <- fromJSON(d_content)
   return(d_content)
 }
+
+
+
+
 
 
 
@@ -154,6 +168,11 @@ kobohr_count_submission <-function(url,u,pw){
   d_content <- rawToChar(rawdata$content)
   d_content <- fromJSON(d_content)
   d_count_submission <- d_content$count
+  #check whether there is record or not
+  if (is.null(d_count_subm)){
+    d_count_submission <-0
+  }
+  return(d_count_submission)
 }
 
 #downlod data in CSV format
