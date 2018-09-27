@@ -4,7 +4,16 @@ This toolbox contains R-script functions to perform several tasks using API for 
 Functions defined in the file  
 https://github.com/ppsapkota/kobohr_apitoolbox/blob/master/R/r_func_ps_kobo_utils.R
 
-## Download form/project list
+
+Locate raw file in the github.
+
+```r
+library(devtools)
+source_url("https://raw.githubusercontent.com/ppsapkota/kobohr_apitoolbox/master/R/r_func_ps_kobo_utils.R")
+```  
+After loading the file, all functions will be available for you to use.  
+
+## Download form/project list  
 ```r
 url <-"https://kc.humanitarianresponse.info/api/v1/data.csv"
 d_formlist_csv <- kobohr_getforms_csv (url,kobo_user, kobo_pw)
