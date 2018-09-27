@@ -12,10 +12,10 @@ d_formlist_csv <- as.data.frame(d_formlist_csv)
 ```
 
 **usage:**  
-kobo_user <- kobo user account name as string (example "nnkbuser")
-kobo_pw <- password for kobo user account as string (example "nnkbpassword")
+kobo_user <- kobo user account name as string (example "nnkbuser")  
+kobo_pw <- password for kobo user account as string (example "nnkbpassword")  
 
-## Download data in CSV format
+## Download data in CSV format  
 ```r
 url<-https://kc.humanitarianresponse.info/api/v1/data/form_id.csv
 d_raw <- kobohr_getdata_csv(url,kobo_user,kobo_pw)  
