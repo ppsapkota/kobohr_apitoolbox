@@ -23,16 +23,16 @@ data <- as.data.frame(d_raw)
 ```
 **usage:**  
 form_id <- id of the deployed project (for example 112233)  
-For the project or form ID, you can download the list of forms available in your account using __kobohr_getforms_csv__ function.
+For the project or form ID, you can download the list of forms available in your account using __kobohr_getforms_csv__ function.  
 
-## Check submission count for the project
+## Check submission count for the project  
 ```r
 stat_url<- paste0('https://kc.humanitarianresponse.info/api/v1/stats/submissions/',form_id,'?group=a')    
 d_count_subm <- kobohr_count_submission (stat_url,kobo_user,Kobo_pw)  
 ``` 
-returns number of records submitted for a project
-**usage:**
-form_id <- id of the deployed project (for example 112233) 
+returns number of records submitted for a project  
+**usage:**  
+form_id <- id of the deployed project (for example 112233)   
 ```r
 #you can check the number of records submitted before downloading the data
 if (d_count_subm>0){
@@ -43,25 +43,25 @@ if (d_count_subm>0){
 }
 ```
 ## Upload xlsform using new KoBo API (KPI) and deploy as a project  
-### STEP 1: import xlsx form
+### STEP 1: import xlsx form  
 ```r
   kpi_url <- "https://kobo.humanitarianresponse.info/imports/"
   kobo_form_xlsx <- "abc.xlsx"
   d_content<-kobohr_kpi_upload_xlsform(kpi_url,kobo_form_xlsx,kobo_user,Kobo_pw)
   import_url<-d_content$url
 ```
-### STEP2: get the resulting asset UID
+### STEP2: get the resulting asset UID  
 ```r
 ##Multiple attempts may be required until the server indicates "status": "complete" in the response.
 d_content<-kobohr_kpi_get_asset_uid(import_url,kobo_user,Kobo_pw)
 asset_uid <- d_content$messages$created$uid
 ```
-### STEP3: Deploy an asset
+### STEP3: Deploy an asset  
 ```r
   d_content<-kobohr_kpi_deploy_asset(asset_uid, kobo_user, Kobo_pw)
 ```
 
-## Share Asset to other user
+## Share Asset to other user  
 ```r
 ### share and assign multiple permission
 permission_list <- c("add_submissions","change_submissions","validate_submissions")
