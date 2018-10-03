@@ -8,11 +8,9 @@
 ## SET KoBO user name and password
 kobo_user<- ""
 Kobo_pw<-""
-
 source ("./R/r_ps_kobo_library_init.R")
-source ("./R/r_ps_kobo_authenticate.R")
 ###################---KPI--------#########################################
-kpi_url <- "https://kobo.humanitarianresponse.info/imports/"
+kpi_url <- paste0(kobo_server_url,"imports/")
 #----------------------------------#
 #kobo_form_xlsx<-"./xlsform/kobo_1701_NW.xlsx"
 kobo_form_xlsx_folder<-"./Data/xlsform/nes/"

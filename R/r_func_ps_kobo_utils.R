@@ -74,9 +74,10 @@ kobohr_kpi_get_asset_uid<-function(url, u, pw){
 #-X POST https://kobo.humanitarianresponse.info/assets/apLBsTJ4JAReiAWQQQBKNZ/deployment/ --form active=true | python -m json.tool
 
 #d<-list(owner=paste0("https://kobo.humanitarianresponse.info/users/",kobo_user,"/"),active=TRUE)
+#kobo_url<-""https://kobo.humanitarianresponse.info/"
 kobohr_kpi_deploy_asset<- function (asset_uid, u, pw){
-  asset_deployment_url <-paste0("https://kobo.humanitarianresponse.info/assets/",asset_uid,"/deployment/")
-  d <- list(owner=paste0("https://kobo.humanitarianresponse.info/users/",u,"/"),active=TRUE)
+  asset_deployment_url <-paste0(kobo_server_url,"assets/",asset_uid,"/deployment/")
+  d <- list(owner=paste0(kobo_server_url, "users/",u,"/"),active=TRUE)
   result<-httr::POST (url=asset_deployment_url,
                       body=d,
                       authenticate(u,pw)
@@ -110,8 +111,11 @@ kobohr_kpi_deploy_asset<- function (asset_uid, u, pw){
 #   'change_submissions',
 #   'validate_submissions',
 # )
+
+#kobo_server_url<-"https://kobo.humanitarianresponse.info/"
+
 kobohr_kpi_share_asset<- function (content_object_i, permission_i, user_i, u, pw){
-  asset_share_url <-"https://kobo.humanitarianresponse.info/permissions/"
+  asset_share_url <-paste0(kobo_server_url,"permissions/")
   d <- list(content_object=content_object_i, permission=permission_i, user=user_i)
   result<-httr::POST (url=asset_share_url,
                       body=d,
@@ -121,12 +125,6 @@ kobohr_kpi_share_asset<- function (content_object_i, permission_i, user_i, u, pw
   d_content <- fromJSON(d_content)
   return(d_content)
 }
-
-
-
-
-
-
 
 ###--------SECTION 1---KC---------
 #---Upload form in KoBo toolbox--------
@@ -184,12 +182,12 @@ kobohr_count_submission <-function(url,u,pw){
 kobohr_download_csv<-function(formid,savepath,u,pw){
   #check the submission first
   d_count_subm<-NULL
-  stat_url<- paste0('https://kc.humanitarianresponse.info/api/v1/stats/submissions/',formid,'?group=anygroup')
+  stat_url<- paste0(kc_server_url,"api/v1/stats/submissions/",formid,"?group=anygroup")
   d_count_subm <- kobohr_count_submission (stat_url,u,pw)
   #download data only if submission
   if (!is.null(d_count_subm)){
     #Example "https://kc.humanitarianresponse.info/api/v1/data/79489.csv"
-    kobo_csv_url <- paste0("https://kc.humanitarianresponse.info/api/v1/data/", formid,".csv")
+    kobo_csv_url <- paste0(kc_server_url,"api/v1/data/", formid,".csv")
     d_rawi<-kobohr_getdata_csv(kobo_csv_url,u,pw)
     #write to csv
     #save file name

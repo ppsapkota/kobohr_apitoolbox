@@ -75,8 +75,6 @@ url<-"https://kc.humanitarianresponse.info/syriaregional3/reports/au38VsvVzqkwZV
 
 rawdata<-GET(url,authenticate(u,pw),progress())
 d_content_csv <-read_csv(content(rawdata$content,"raw",encoding = "UTF-8"))
-
-
 d_content <- rawToChar(rawdata$content)
 d_content <- fromJSON(d_content)
 

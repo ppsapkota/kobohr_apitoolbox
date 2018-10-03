@@ -10,11 +10,6 @@ library(ggplot2)
 library(rgdal)
 #library(xlsx) #write.xlsx2
 library(openxlsx) #'write xlsx'
-#library(XLConnect) #for big file to write
-
-
-#library(data.table)
-
 
 #load file r_kobo_utils.R file first
 options(java.parameters = "-Xmx6000m")
@@ -27,11 +22,11 @@ Sys.getenv("R_ZIPCMD","zip")
 source("./Authenticate/r_ps_kobo_authenticate.R")
 source("./R/r_func_ps_kobo_utils.R")
 source("./R/r_func_ps_utils.R")
+source("./R/r_global_settings.R")
+###--------Path settings----------------
 path <- Sys.getenv("PATH")
 Sys.setenv("PATH" = paste(path, "C:/Rtools/bin", sep = ";"))
-
 tempfile(tmpdir="./Data/TempData")
-
 
 
 
