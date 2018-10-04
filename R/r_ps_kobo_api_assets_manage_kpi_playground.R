@@ -58,6 +58,45 @@ names(d_asset)<-c("url","date_modified","owner","owner__username","uid","kind","
 ###save to file
 openxlsx::write.xlsx(d_asset,paste0("./Data/",kobo_user,"_asset_list.xlsx"), sheetName="asset_list")
 
+###Alternate
+getOption("encoding")
+Sys.getlocale("LC_ALL")
+
+api_url <-paste0(kobo_server_url, "forms/assets/?limit=500&offset=0")
+result<-GET(api_url,authenticate(u,pw),progress())
+d_content <- rawToChar(result$content,encoding = "UTF-8")
+d_content <- fromJSON(d_content)
+d_asset<-data.frame(d_content$results$url,
+                    d_content$results$date_modified,
+                    d_content$results$owner,
+                    d_content$results$owner__username,
+                    d_content$results$uid,
+                    d_content$results$kind,
+                    d_content$results$name,
+                    d_content$results$asset_type,
+                    d_content$results$deployment__active,
+                    d_content$results$deployment__identifier,
+                    d_content$results$deployment__submission_count)
+
+
+###Get asset information
+asset_uid<-"anBiBMq3f75WWCaJfNs7Eo"
+api_url<-paste0(kobo_server_url,"assets/",asset_uid,"/")
+#api_url<-"https://kc.humanitarianresponse.info/syriaregional3/reports/au38VsvVzqkwZVFKxRPVAf/export.xlsx"
+result<-GET(api_url,authenticate(u,pw),progress())
+d_content <- rawToChar(result$content)
+d_content <- fromJSON(d_content)
+
+d_downloads<-as.data.frame(d_content$deployment__data_download_links$csv, d_content$deployment__data_download_links$xls)
+
+#https://kc.humanitarianresponse.info/syriaregional3/reports/anBiBMq3f75WWCaJfNs7Eo/export.csv
+api_url<- paste0(kc_server_url,kobo_user,"/reports/",asset_uid,"/export.csv")
+rawdata<-GET(api_url,authenticate(u,pw),progress())
+d_content <- read_csv(content(rawdata,"raw",encoding = "UTF-8"))
+
+
+d_content <- rawToChar(rawdata$content)
+d_content <- fromJSON(d_content)
 
 
 # "deployment__data_download_links": {
@@ -72,11 +111,6 @@ openxlsx::write.xlsx(d_asset,paste0("./Data/",kobo_user,"_asset_list.xlsx"), she
 # }
 
 url<-"https://kc.humanitarianresponse.info/syriaregional3/reports/au38VsvVzqkwZVFKxRPVAf/export.csv"
-
-rawdata<-GET(url,authenticate(u,pw),progress())
-d_content_csv <-read_csv(content(rawdata$content,"raw",encoding = "UTF-8"))
-d_content <- rawToChar(rawdata$content)
-d_content <- fromJSON(d_content)
 
 
 
