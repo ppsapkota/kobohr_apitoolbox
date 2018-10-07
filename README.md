@@ -30,7 +30,7 @@ url<-"https://kc.humanitarianresponse.info/api/v1/data/form_id.csv"
 d_raw <- kobohr_getdata_csv(url,kobo_user,kobo_pw)  
 data <- as.data.frame(d_raw)
 ```
-**usage:**  
+**usage:**   
 form_id <- id of the deployed project (for example 112233)  
 For the project or form ID, you can download the list of forms available in your account using __kobohr_getforms_csv__ function.  
 
