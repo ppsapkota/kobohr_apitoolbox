@@ -87,34 +87,34 @@ kobohr_kpi_deploy_asset<- function (asset_uid, u, pw){
   print (paste0("Deployment Success - ", d_content$identifier))
   return(d_content)
 }
-
-
-#Share asset with another user
-# Share a form
-# Sharing requires a POST to https://kobo.humanitarianresponse.info/permissions/ with three form parameters:
-#    content_object: the URL, relative or absolute, of the asset to be shared, e.g. `/assets/aSAKqcFRv9nYWqiKGvZC7w/;
-#  permission: a string indicating the permission to grant, e.g. change_asset. This can be any assignable permission for an
-# asset;
-#  user: the URL, relative or absolute, identifying the user who will receive the new permission, e.g. /users/jnm/. The last
-# component of the URL is the username.
-# john@scrappy:/tmp/api_demo$ curl ‐‐silent ‐‐user jnm_api:test‐for‐punya ‐‐header 'Accept:
-# application/json' ‐X POST https://kobo.humanitarianresponse.info/permissions/ ‐‐form
-# content_object=/assets/apLBsTJ4JAReiAWQQQBKNZ/ ‐‐form permission=change_asset ‐‐form
-# user=/users/jnm/ | python ‐m json.tool
-##SHARE AssET
-# Assignable permissions that are stored in the database
-# ASSIGNABLE_PERMISSIONS = (
-#   'view_asset',
-#   'change_asset',
-#   'add_submissions',
-#   'view_submissions',
-#   'change_submissions',
-#   'validate_submissions',
-# )
-
-#kobo_server_url<-"https://kobo.humanitarianresponse.info/"
-
-kobohr_kpi_share_asset<- function (content_object_i, permission_i, user_i, u, pw){
+#
+# #Share asset with another user
+# # Share a form
+# # Sharing requires a POST to "https://kobo.humanitarianresponse.info/permissions/"
+# # with three form parameters
+# # content_object: the URL, relative or absolute, of the asset to be shared, e.g. /assets/aSAKqcFRv9nYWqiKGvZC7w/
+# # permission: a string indicating the permission to grant, e.g. change_asset. This can be any assignable permission for an
+# # asset
+# # user: the URL, relative or absolute, identifying the user who will receive the new permission, e.g. /users/jnm/. The last
+# # component of the URL is the username.
+# # john@scrappy:/tmp/api_demo$ curl ‐‐silent ‐‐user jnm_api:test‐for‐punya ‐‐header 'Accept:
+# # application/json' ‐X POST 'https://kobo.humanitarianresponse.info/permissions/' ‐‐form
+# # content_object=/assets/apLBsTJ4JAReiAWQQQBKNZ/ ‐‐form permission=change_asset ‐‐form
+# # user=/users/jnm/ | python ‐m json.tool
+# ##SHARE AssET
+# # Assignable permissions that are stored in the database
+# # ASSIGNABLE_PERMISSIONS = (
+# #   'view_asset',
+# #   'change_asset',
+# #   'add_submissions',
+# #   'view_submissions',
+# #   'change_submissions',
+# #   'validate_submissions',
+# # )
+# 
+# #kobo_server_url<-"https://kobo.humanitarianresponse.info/"
+#
+kobohr_kpi_share_asset<-function(content_object_i, permission_i, user_i, u, pw){
   asset_share_url <-paste0(kobo_server_url,"permissions/")
   d <- list(content_object=content_object_i, permission=permission_i, user=user_i)
   result<-httr::POST (url=asset_share_url,
@@ -126,7 +126,101 @@ kobohr_kpi_share_asset<- function (content_object_i, permission_i, user_i, u, pw
   return(d_content)
 }
 
-###--------SECTION 1---KC---------
+#----CREATE EXPORTS-------------------------#
+#Examples to call functions
+# d_exports<-kobohr_create_export(type=type,lang=lang,fields_from_all_versions=fields_from_all_versions,hierarchy_in_labels=hierarchy_in_labels,group_sep=group_sep,asset_uid=asset_uid,kobo_user,Kobo_pw)
+# d_exports<-as.data.frame(d_exports)
+# 
+# d_latest_export<-kobohr_latest_exports(asset_uid,kobo_user,Kobo_pw)
+# d_latest_export<-as.data.frame(d_latest_export)
+#################-----https://github.com/tinok/kobo_api/blob/master/get_csv.py--------------#########
+# ###Get asset information
+# asset_uid<-"aaUR7DuXPLGsVUqMbv7BcB"
+# ###define some variables
+# # These variables define the default export. Each value can be overwritten when running the `create' command
+# # e.g. `create xml 'English (en_US)' true'. It's possible to skip some arguments at the end but they need to be passed in the same order.
+# asset_uid_<-asset_uid
+# type <- "csv"
+# lang <- "xml"
+# fields_from_all_versions <- "true"
+# hierarchy_in_labels <- "false"
+# group_sep = "/"
+
+###--CREATE EXPORT-----------
+kobohr_create_export<-function(type,lang,fields_from_all_versions,hierarchy_in_labels,group_sep,asset_uid,kobo_user,Kobo_pw){
+  api_url_export<-paste0(kobo_server_url,"exports/")
+  api_url_asset<-paste0(kobo_server_url,"assets/",asset_uid,"/")
+  api_url_export_asset<-paste0(kobo_server_url,"exports/",asset_uid,"/")
+  #
+  d<-list(source=api_url_asset,
+          type=type,
+          lang=lang,
+          fields_from_all_versions=fields_from_all_versions,
+          hierarchy_in_labels=hierarchy_in_labels,
+          group_sep=group_sep)
+  #fetch data
+  result<-httr::POST (url=api_url_export,
+                      body=d,
+                      authenticate(kobo_user,Kobo_pw),
+                      progress()
+  )
+  
+  print(paste0("status code:",result$status_code))
+  d_content <- rawToChar(result$content)
+  print(d_content)
+  d_content <- fromJSON(d_content)
+  return(d_content)
+}
+
+###---list exports----------------###
+#https://www.r-bloggers.com/using-the-httr-package-to-retrieve-data-from-apis-in-r/
+kobohr_list_exports<-function(asset_uid,kobo_user,Kobo_pw){
+  api_url_export<-paste0(kobo_server_url,"exports/")
+  api_url_asset<-paste0(kobo_server_url,"assets/",asset_uid,"/")
+  api_url_export_asset<-paste0(kobo_server_url,"exports/",asset_uid,"/")
+  #
+  payload<-list(q=paste0('source:',asset_uid))
+  #payload<-list(source=asset_uid_)
+  #fetch data
+  result<-httr::GET (url=api_url_export,
+                     query=payload,
+                     authenticate(kobo_user,Kobo_pw),
+                     progress()
+  )
+  
+  warn_for_status(result)
+  stop_for_status(result)
+  
+  print(paste0("status code:",result$status_code))
+  #
+  d_content<-fromJSON(content(result,"text",encoding = "UTF-8"))
+  #get both result and data
+  d_content_result<-data.frame(d_content$results$result,d_content$results$date_created,d_content$results$last_submission_time)
+  #replace texts in the field name
+  names(d_content_result)<-str_remove(names(d_content_result),"d_content.results.")
+  d_content_data<-data.frame(d_content$results$data)
+  d_content_all<-bind_cols(d_content_result,d_content_data)
+  ##rename
+  #names(d_content_all)<-c("result",names(d_content_data))
+  #filter content by the asset uid
+  d_content_list<-d_content_all %>% 
+    filter(str_detect(source,asset_uid))
+  #d_content_ <-as.data.frame(d_content$results$url,d_content$results$uid)
+  return(d_content_list)
+}
+
+
+#Get the latest export URL
+kobohr_latest_exports<-function(asset_uid,kobo_user,Kobo_pw){
+  d_list_export_urls<-kobohr_list_exports(asset_uid,kobo_user,Kobo_pw)
+  d_list_url<-d_list_export_urls[nrow(d_list_export_urls),]
+  latest_url<-d_list_url$result
+  return(latest_url)
+}
+
+
+###################--------SECTION 1---########################################
+#########--------------------KC--------------------############################
 #---Upload form in KoBo toolbox--------
 #curl -X POST -F xls_file=@/path/to/form.xls https://kobo.humanitarianresponse.info/api/v1/forms
 #POST(url, body = upload_file("mypath.txt"))
