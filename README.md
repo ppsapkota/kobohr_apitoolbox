@@ -51,7 +51,7 @@ if (d_count_subm>0){
       #do more here, for example save the data as a xls file.
 }
 ```
-## Upload xlsform using new KoBo API (KPI) and deploy as a project  
+## Upload xlsform using new KoBo API (KPI), deploy as a project and share with KoBo user.
 ### STEP 1: import xlsx form  
 ```r
   kpi_url <- "https://kobo.humanitarianresponse.info/imports/"
@@ -62,6 +62,8 @@ if (d_count_subm>0){
 ### STEP2: get the resulting asset UID  
 ```r
 ##Multiple attempts may be required until the server indicates "status": "complete" in the response.
+#import_url<-"https://kobo.humanitarianresponse.info/imports/iGYukk6NVEA64zwMsPtgRD/
+#the import url is the resulting url from the step 1.
 d_content<-kobohr_kpi_get_asset_uid(import_url,kobo_user,Kobo_pw)
 asset_uid <- d_content$messages$created$uid
 ```
@@ -70,15 +72,10 @@ asset_uid <- d_content$messages$created$uid
   d_content<-kobohr_kpi_deploy_asset(asset_uid, kobo_user, Kobo_pw)
 ```
 
-## Share Asset to other user  
+### STEP4: Share Asset to other user  
 ```r
 ### share and assign multiple permission
-permission_list <- c("add_submissions","change_submissions","validate_submissions")
-content_object_i <- paste0("/assets/", asset_uid,"/")
-user_i <- "externalusername" #kobo user account to share the asset         
-for (permission_i in permission_list){
-    d_content<-kobohr_kpi_share_asset(content_object_i, permission_i, user_i, kobo_user, Kobo_pw)
-}
+### create permission list as required.
 # ASSIGNABLE_PERMISSIONS = (
 #   'view_asset',
 #   'change_asset',
@@ -87,4 +84,63 @@ for (permission_i in permission_list){
 #   'change_submissions',
 #   'validate_submissions',
 # )
+permission_list <- c("add_submissions","change_submissions","validate_submissions")
+content_object_i <- paste0("/assets/", asset_uid,"/")
+user_i <- "external username" #kobo user account to share the asset         
+for (permission_i in permission_list){
+    d_content<-kobohr_kpi_share_asset(content_object_i, permission_i, user_i, kobo_user, Kobo_pw)
+}
+
 ```
+## KoBo exports
+Create KoBo data export and get the export list to pull data using the new KoBoToolbox API (https://github.com/kobotoolbox/kpi/). This is based on the code sample written in Python at https://github.com/tinok/kobo_api
+
+### Create Exports
+To download the most updated data, create export, retrieve the latest export and download data
+```r
+# set kobo server URL
+# the kobo server URL is passed as global variable
+kobo_server_url<-"https://kobo.humanitarianresponse.info/"
+kc_server_url<-"https://kc.humanitarianresponse.info/"
+
+# Reference https://github.com/tinok/kobo_api/blob/master/get_csv.py
+# Get asset information
+asset_uid<-"aaUR7DuXPLGsVUqMbv7BcB"
+
+# define some variables
+# These variables define the default export. Each value can be overwritten when running the `create' command
+# e.g. `create xml 'English (en_US)' true'. It's possible to skip some arguments at the end but they need to be passed in the same order.
+asset_uid_<-asset_uid
+type <- "csv"
+lang <- "xml"
+fields_from_all_versions <- "true"
+hierarchy_in_labels <- "false"
+group_sep = "/"
+
+
+#Examples to call function
+d_exports<-kobohr_create_export(type=type,lang=lang,fields_from_all_versions=fields_from_all_versions,hierarchy_in_labels=hierarchy_in_labels,group_sep=group_sep,asset_uid=asset_uid,kobo_user,Kobo_pw)
+d_exports<-as.data.frame(d_exports)
+```
+### Get list of exports
+Use this function to retrieve the list of already creaded exports for a project identified by asset_uid
+```r
+###---list exports----------------###
+#https://www.r-bloggers.com/using-the-httr-package-to-retrieve-data-from-apis-in-r/
+
+d_list_export<-kobohr_list_exports(asset_uid,kobo_user,Kobo_pw)
+ 
+```
+### Get the latest export URL
+To retrieve the latest export created for a project.
+```r
+###---list exports----------------###
+d_list_export<-kobohr_list_exports(asset_uid,kobo_user,Kobo_pw)
+ 
+```
+
+
+
+
+
+

@@ -74,7 +74,7 @@ kobohr_kpi_get_asset_uid<-function(url, u, pw){
 #-X POST https://kobo.humanitarianresponse.info/assets/apLBsTJ4JAReiAWQQQBKNZ/deployment/ --form active=true | python -m json.tool
 
 #d<-list(owner=paste0("https://kobo.humanitarianresponse.info/users/",kobo_user,"/"),active=TRUE)
-#kobo_url<-""https://kobo.humanitarianresponse.info/"
+#kobo_server_url<-""https://kobo.humanitarianresponse.info/"
 kobohr_kpi_deploy_asset<- function (asset_uid, u, pw){
   asset_deployment_url <-paste0(kobo_server_url,"assets/",asset_uid,"/deployment/")
   d <- list(owner=paste0(kobo_server_url, "users/",u,"/"),active=TRUE)
@@ -145,6 +145,11 @@ kobohr_kpi_share_asset<-function(content_object_i, permission_i, user_i, u, pw){
 # fields_from_all_versions <- "true"
 # hierarchy_in_labels <- "false"
 # group_sep = "/"
+# set kobo server URL
+# KoBo server URL is passed as a global variable
+# kobo_server_url<-"https://kobo.humanitarianresponse.info/"
+# kc_server_url<-"https://kc.humanitarianresponse.info/"
+
 
 ###--CREATE EXPORT-----------
 kobohr_create_export<-function(type,lang,fields_from_all_versions,hierarchy_in_labels,group_sep,asset_uid,kobo_user,Kobo_pw){
@@ -273,6 +278,11 @@ kobohr_count_submission <-function(url,u,pw){
 #-----savepath <- "./data/data_export_csv/"
 #-----u <- "username"
 #-----pw <- "password"
+# set kobo server URL
+#kobo_server_url<-"https://kobo.humanitarianresponse.info/"
+#kc_server_url<-"https://kc.humanitarianresponse.info/"
+
+
 kobohr_download_csv<-function(formid,savepath,u,pw){
   #check the submission first
   d_count_subm<-NULL
