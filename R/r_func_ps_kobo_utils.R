@@ -14,6 +14,7 @@ Last Modified: 23 May 2018
 
 ###--------SECTION 2---KPI---------
 #---Upload form in NEW KoBo toolbox--------
+#STEP1------
 #Import your form first (POST to https://kobo.humanitarianresponse.info/imports/)
 #which will create a new asset in KPI which you can then deploy 
 #by POSTing to https://kobo.humanitarianresponse.info/assets/[asset ID number]/deployment/
@@ -87,7 +88,7 @@ kobohr_kpi_deploy_asset<- function (asset_uid, u, pw){
   print (paste0("Deployment Success - ", d_content$identifier))
   return(d_content)
 }
-#
+
 # #Share asset with another user
 # # Share a form
 # # Sharing requires a POST to "https://kobo.humanitarianresponse.info/permissions/"
@@ -98,7 +99,8 @@ kobohr_kpi_deploy_asset<- function (asset_uid, u, pw){
 # # user: the URL, relative or absolute, identifying the user who will receive the new permission, e.g. /users/jnm/. The last
 # # component of the URL is the username.
 # # john@scrappy:/tmp/api_demo$ curl ‐‐silent ‐‐user jnm_api:test‐for‐punya ‐‐header 'Accept:
-# # application/json' ‐X POST 'https://kobo.humanitarianresponse.info/permissions/' ‐‐form
+# # application/json' ‐X 
+# # POST "https://kobo.humanitarianresponse.info/permissions/" ‐‐form
 # # content_object=/assets/apLBsTJ4JAReiAWQQQBKNZ/ ‐‐form permission=change_asset ‐‐form
 # # user=/users/jnm/ | python ‐m json.tool
 # ##SHARE AssET
@@ -113,7 +115,7 @@ kobohr_kpi_deploy_asset<- function (asset_uid, u, pw){
 # # )
 # 
 # #kobo_server_url<-"https://kobo.humanitarianresponse.info/"
-#
+
 kobohr_kpi_share_asset<-function(content_object_i, permission_i, user_i, u, pw){
   asset_share_url <-paste0(kobo_server_url,"permissions/")
   d <- list(content_object=content_object_i, permission=permission_i, user=user_i)
@@ -198,7 +200,12 @@ kobohr_list_exports<-function(asset_uid,kobo_user,Kobo_pw){
   
   print(paste0("status code:",result$status_code))
   #
-  d_content<-fromJSON(content(result,"text",encoding = "UTF-8"))
+  d_content <- rawToChar(result$content)
+  Encoding(d_content) <- "UTF-8"
+  d_content <- fromJSON(d_content)
+  #
+  #d_content<-fromJSON(content(result,"text",encoding = "UTF-8"))
+  
   #get both result and data
   d_content_result<-data.frame(d_content$results$result,d_content$results$date_created,d_content$results$last_submission_time)
   #replace texts in the field name
@@ -214,13 +221,39 @@ kobohr_list_exports<-function(asset_uid,kobo_user,Kobo_pw){
   return(d_content_list)
 }
 
-
 #Get the latest export URL
 kobohr_latest_exports<-function(asset_uid,kobo_user,Kobo_pw){
   d_list_export_urls<-kobohr_list_exports(asset_uid,kobo_user,Kobo_pw)
   d_list_url<-d_list_export_urls[nrow(d_list_export_urls),]
-  latest_url<-d_list_url$result
+  #latest_url<-d_list_url$result
+  latest_url<-d_list_url
   return(latest_url)
+}
+
+# Download Asset list - form list
+kobohr_kpi_get_asset_list<-function(kobo_server_url, kobo_user,Kobo_pw){
+  api_url <-paste0(kobo_server_url, "forms/assets/?limit=1000&offset=0")
+  result<-GET(api_url,authenticate(kobo_user,Kobo_pw),progress())
+  ##print (result)
+  #
+  d_content <- rawToChar(result$content)
+  Encoding(d_content) <- "UTF-8"
+  #
+  d_content <- fromJSON(d_content)
+  d_asset<-data.frame(d_content$results$url,
+                      d_content$results$date_modified,
+                      d_content$results$owner,
+                      d_content$results$owner__username,
+                      d_content$results$uid,
+                      d_content$results$kind,
+                      d_content$results$name,
+                      d_content$results$asset_type,
+                      d_content$results$deployment__active,
+                      d_content$results$deployment__identifier,
+                      d_content$results$deployment__submission_count)
+
+  names(d_asset)<-c("url","date_modified","owner","owner__username","uid","kind","name","asset_type","deployment__active","deployment__identifier","deployment__submission_count")
+  return (d_asset)
 }
 
 
